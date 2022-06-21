@@ -10,7 +10,6 @@ import datetime
 import time
 import os
 from tqdm import tqdm
-from utils import *
 import argparse
 from keras.preprocessing.image import load_img, img_to_array
 
