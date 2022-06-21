@@ -3,39 +3,68 @@ Facial Expression Rcognition(FER) based on deep convolutional neural network(CNN
 
 ## Dataset
 FER2013   [Challenges in Representation Learning: Facial Expression Recognition Challenge](https://www.kaggle.com/c/challenges-in-representation-learning-facial-expression-recognition-challenge)  
-Download `fer2013.csv` and put it into `./data`
+Download `icml_face_data.csv` and put it into `./data`
 ## Model
 Based on VGG16, with GaussianNoise, and simpler fully-connected layers in the top. 
 ```python
-main_input = layers.Input([config.img_size, config.img_size, 1])
+# input  
+input = Input(shape=(img_size, img_size, 1))
 
-x = layers.BatchNormalization()(main_input)
+x = layers.BatchNormalization()(input)
 x = layers.GaussianNoise(0.01)(x)
 
-base_model = VGG16(weights=None, input_tensor=x, include_top=False)
+# 1st Conv Block
+x = Conv2D(filters=64, kernel_size=3, padding='same', activation='relu')(x)
+x = Conv2D(filters=64, kernel_size=3, padding='same', activation='relu')(x)
+x = MaxPool2D(pool_size=2, strides=2, padding='same')(x)
 
-# flatten = layers.GlobalAveragePooling2D()(base_model.output)
-flatten = Flatten()(base_model.output)
+# 2nd Conv Block
+x = Conv2D(filters=128, kernel_size=3, padding='same', activation='relu')(x)
+x = Conv2D(filters=128, kernel_size=3, padding='same', activation='relu')(x)
+x = MaxPool2D(pool_size=2, strides=2, padding='same')(x)
 
-fc = Dense(2048, activation='relu',
-           kernel_regularizer=l2(0.001),
-           bias_regularizer=l2(0.001),
-           )(flatten)
+# 3rd Conv block  
+x = Conv2D(filters=256, kernel_size=3, padding='same', activation='relu')(x) 
+x = Conv2D(filters=256, kernel_size=3, padding='same', activation='relu')(x) 
+x = Conv2D(filters=256, kernel_size=3, padding='same', activation='relu')(x) 
+x = MaxPool2D(pool_size=2, strides=2, padding='same')(x)
+
+# 4th Conv block
+x = Conv2D(filters=512, kernel_size=3, padding='same', activation='relu')(x)
+x = Conv2D(filters=512, kernel_size=3, padding='same', activation='relu')(x)
+x = Conv2D(filters=512, kernel_size=3, padding='same', activation='relu')(x)
+x = MaxPool2D(pool_size=2, strides=2, padding='same')(x)
+
+# 5th Conv block
+x = Conv2D(filters=512, kernel_size=3, padding='same', activation='relu')(x)
+x = Conv2D(filters=512, kernel_size=3, padding='same', activation='relu')(x)
+x = Conv2D(filters=512, kernel_size=3, padding='same', activation='relu')(x)
+x = MaxPool2D(pool_size=3, strides=3, padding='same')(x)
+
+# Fully connected layers
+flatten = Flatten()(x)
+fc = Dense(units=2048, 
+            activation='relu', 
+            kernel_regularizer=l2(0.001), 
+            bias_regularizer=l2(0.001)
+            )(flatten)
 fc = Dropout(dropout_rate)(fc)
-fc = Dense(2048, activation='relu',
-           kernel_regularizer=l2(0.001),
-           bias_regularizer=l2(0.001),
-           )(fc)
+fc = Dense(units=2048, 
+            activation='relu',
+            kernel_regularizer=l2(0.001),
+            bias_regularizer=l2(0.001),
+            )(fc)
 fc = Dropout(dropout_rate)(fc)
+output = Dense(class_num, activation="softmax")(fc)
 
-predictions = Dense(config.class_num, activation="softmax")(fc)
+# creating the model
+model = Model(inputs=input, outputs=output)
 
-model = keras.Model(inputs=main_input, outputs=predictions, name='vgg16')
+optimizer = Adam(learning_rate)
+model.compile(optimizer=optimizer, 
+                loss=keras.losses.categorical_crossentropy, 
+                metrics=['categorical_accuracy'])
 
-optimizer = keras.optimizers.Adam(lr)
-model.compile(loss='categorical_crossentropy',
-              optimizer=optimizer,
-              metrics=['categorical_accuracy'])
 return model
 ```
 ## Preprocessing
@@ -85,7 +114,7 @@ After running the script, you should get the following files.
 `shape_predictor_68_face_landmarks.dat` is downloaded from [davisking/dlib-models
 ](https://github.com/davisking/dlib-models)
 ```
-│  fer2013.csv
+│  icml_face_data.csv
 │  shape_predictor_68_face_landmarks.dat
 │  test.pickle
 │  test_landmark.npz
@@ -96,7 +125,21 @@ After running the script, you should get the following files.
 │  __init__.py
 ├─test
 ├─train
+| ├─0
+| ├─1
+| ├─2
+| ├─3
+| ├─4
+| ├─5
+| └─6
 └─valid
+  ├─0
+  ├─1
+  ├─2
+  ├─3
+  ├─4
+  ├─5
+  └─6
 ```
 ## Image Augmentation
 ```python
@@ -196,8 +239,8 @@ f1 score: 0.6667545793929432, acc: 0.6682750301568154, recall: 0.668275030156815
 ![surprise_result](data/demo/surprise_result.png)
 
 ## Environment
-* python 3.6.5
-* tensorflow 1.13.1
-* keras 2.2.4
+* python 3.9.7
+* tensorflow 2.8.0
+* keras 2.8.0
 * dlib 
 * opencv
