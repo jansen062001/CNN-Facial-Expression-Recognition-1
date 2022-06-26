@@ -224,19 +224,17 @@ optional arguments:
 ```
 
 ## Result
-![accuracy](data/acc.png)
-![loss](data/loss.png)
-![lr](data/lr.png)
-
-![cm](data/cm.jpg)
+![cm](data/cm.png)
 ```
-f1 score: 0.6667545793929432, acc: 0.6682750301568154, recall: 0.6682750301568154
+f1 score: 0.6575245688429467, acc: 0.6682750301568154, recall: 0.6682750301568154
 ```
 
 ## Example
 ![angry_result](data/demo/angry_result.png)
-![sad_score](data/demo/sad_result.png)
+![sad_result](data/demo/sad_result.png)
 ![surprise_result](data/demo/surprise_result.png)
+![fear_result](data/demo/fear_result.png)
+![happy_result](data/demo/happy_result.png)
 
 ## Environment
 * python 3.9.7
